@@ -1,0 +1,51 @@
+version: '2.4'
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+
+  application:
+    build:
+      context: ../application
+      target: dev
+    # Debugging port for SS
+    ports:
+      - 9007:9229
+      - 8080:8080
+    image: swipen-be/application:dev
+    environment:
+      MYSQL_USERNAME: $MYSQL_USERNAME
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
+      MYSQL_DATABASE: $DIRECT_DEBIT_DB
+      MYSQL_HOST: $MYSQL_HOST
+      MODE: TEST
+      AWS_PROFILE: $AWS_PROFILE_LCSDR
+      AWS_REGION: $AWS_REGION
+      AWS_API_VERSION: $AWS_API_VERSION
+    volumes:
+      - ../application:/app:delegated
+#     healthcheck:
+#           test: ["CMD", "curl", "http://localhost:8080/healthz"]
+#           timeout: 3s
+#           retries: 3
+#     depends_on:
+#       db:
+#         condition: service_healthy
+
+
+volumes:
+  db:
