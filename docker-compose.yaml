@@ -1,6 +1,25 @@
 version: '2.4'
 
 services:
+  db:
+    build:
+      context: ./db
+    image: swipen-db/swipen-db:dev
+    ports:
+      - 3370:3306
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_USER: 'swipen'
+      MYSQL_PASSWORD: 'secret'
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 30s
+      retries: 10
+
   mongo:
     image: mongo
     restart: always
@@ -28,23 +47,23 @@ services:
       - 8080:8080
     image: swipen-be/application:dev
     environment:
-      MYSQL_USERNAME: $MYSQL_USERNAME
-      MYSQL_PASSWORD: $MYSQL_PASSWORD
-      MYSQL_DATABASE: $DIRECT_DEBIT_DB
-      MYSQL_HOST: $MYSQL_HOST
+      MYSQL_USERNAME: swipen
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: application
+      MYSQL_HOST: db
       MODE: TEST
       AWS_PROFILE: $AWS_PROFILE_LCSDR
       AWS_REGION: $AWS_REGION
       AWS_API_VERSION: $AWS_API_VERSION
     volumes:
       - ../application:/app:delegated
-#     healthcheck:
-#           test: ["CMD", "curl", "http://localhost:8080/healthz"]
-#           timeout: 3s
-#           retries: 3
-#     depends_on:
-#       db:
-#         condition: service_healthy
+    healthcheck:
+          test: ["CMD", "curl", "http://localhost:8080/healthz"]
+          timeout: 3s
+          retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
 
 
 volumes:
