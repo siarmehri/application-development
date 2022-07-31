@@ -53,7 +53,7 @@ services:
       MYSQL_HOST: $MYSQL_HOST_SWIPEN
       MODE: TEST
       AWS_PROFILE: swipen-dev
-      AWS_REGION: eu-west-dev
+      AWS_REGION: eu-west-2
       AWS_API_VERSION: '2012-11-05'
       AWS_SWIPEN_BUCKET: $AWS_SWIPEN_DEV_BUCKET
     volumes:
